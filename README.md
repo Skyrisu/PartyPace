@@ -80,4 +80,4 @@ Please [open an issue on GitHub](https://github.com/Skyrisu/PartyPace/issues) �
 
 ## License
 
-All Rights Reserved © Skyrisu. You're welcome to use and tinker with PartyPace for yourself – please don't re-upload it. See [LICENSE](LICENSE).
+All Rights Reserved © Skyrisu. You're welcome to use and tinker with PartyPace for yourself – please don't re-upload it. See [LICENSE](https://github.com/Skyrisu/PartyPace/blob/main/LICENSE).
