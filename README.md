@@ -16,6 +16,7 @@ Built by a trio of friends leveling together in WoW Forever – because we were 
 **RestedXP integration** *(optional)*
 - "Only current guide steps": the list shrinks to the quests your current RestedXP step (plus a few steps ahead) actually needs – no more digging through the quest log
 - Sorted in guide order, current-step quests are marked
+- Target macro with ping *(off by default, `/pace macro`)*: copies RestedXP's target macro into a `PartyPace` macro that also pings your target for the party
 - Without RestedXP, PartyPace simply shows all quests
 
 **Sharing made easy**
@@ -49,7 +50,7 @@ Built by a trio of friends leveling together in WoW Forever – because we were 
 
 ## Usage
 
-The window shows up automatically when you're in a party. Drag the header to move it, **Ctrl + mouse wheel** to resize, **right-click** the header for all options. You'll also find PartyPace in the addon menu next to the minimap.
+The window shows up automatically when you're in a party. Drag the header to move it, drag the **bottom-right corner** to change width and rows, **Ctrl + mouse wheel** to scale, **right-click** the header for all options. You'll also find PartyPace in the addon menu next to the minimap.
 
 | Command | |
 |---|---|

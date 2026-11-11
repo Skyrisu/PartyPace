@@ -14,3 +14,5 @@ Initial public beta.
 - Filters: group by zone, only differences, hide completed / class / profession / camping quests, hide by Alt-click
 - Hidden in raids by default (option: show own raid group)
 - Minimap addon menu entry
+- Resizable window: drag the corner for quest name width and number of rows
+- Optional RestedXP target macro with attack ping (`/pace macro`)

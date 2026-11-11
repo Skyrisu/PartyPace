@@ -856,6 +856,7 @@ local function OpenMenu(owner)
         function(v) return (DB.guideAhead or 3) == v end,
         function(v) DB.guideAhead = v; ns.GuideCheck(true) end, n)
     end
+    root:CreateCheckbox("Target macro with ping", IsOn("targetMacro"), function() ns.MacroToggle() end)
     root:CreateDivider()
     root:CreateTitle("Hints")
     root:CreateCheckbox("Loot upgrades (who needs this?)", IsOn("lootHints"), function() DB.lootHints = not DB.lootHints end)
@@ -1023,6 +1024,8 @@ SlashCmdList.PARTYPACE = function(msg)
     DB.guideAhead = min(20, max(0, floor(tonumber(arg))))
     ns.GuideCheck(true)
     ns.Print("Guide look-ahead: " .. DB.guideAhead .. " steps")
+  elseif cmd == "macro" then
+    ns.MacroToggle()
   elseif cmd == "raid" then
     DB.raidMode = DB.raidMode == "group" and "hide" or "group"
     ns.Print("In raids: " .. (DB.raidMode == "group" and "show my raid group" or "hide"))
@@ -1057,7 +1060,7 @@ SlashCmdList.PARTYPACE = function(msg)
   else
     ns.Print("Commands:")
     ns.Print("  /pace – show/hide · /pace ready – ready check · /pace share – share missing quests")
-    ns.Print("  /pace guide – only current RestedXP steps · /pace ahead 3 – guide look-ahead")
+    ns.Print("  /pace guide – only current RestedXP steps · /pace ahead 3 – guide look-ahead · /pace macro – target macro with ping")
     ns.Print("  /pace zone|diff|done|class|prof|camp – filters · /pace unhide · /pace raid · /pace autoshare")
     ns.Print("  /pace solo · /pace lock · /pace scale 1.1 (or Ctrl+wheel) · /pace reset · /pace sync")
     ns.Print("Right-click the header for the menu.")
