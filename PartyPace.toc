@@ -26,5 +26,6 @@
 Core.lua
 Guide.lua
 Macro.lua
+Share.lua
 Loot.lua
 UI.lua

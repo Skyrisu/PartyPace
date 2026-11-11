@@ -482,19 +482,6 @@ end
 function ns.Send(msg) if IsInGroup() and announced and ns.Active() then Enqueue(msg) end end
 ns.Player = Player
 
--- Quest, die ich nicht habe: jemanden, der sie hat, bitten sie zu teilen
-function ns.RequestShare(qid)
-  for _, key in ipairs(ns.order) do
-    local p = ns.players[key]
-    if key ~= ns.me and p and p.quests[qid] then
-      ns.Send("P:" .. qid .. "~" .. key)
-      ns.Print(format("Asked %s to share it.", ns.DisplayName(key)))
-      return true
-    end
-  end
-  return false
-end
-
 -- Wo bekommt man die Quest? Kommt aus Questies Datenbank, falls installiert (nur lesend, gecacht)
 local startCache = {}
 function ns.QuestStart(qid)
@@ -754,10 +741,6 @@ local function OnAddon(prefix, msg, _, sender)
 
   elseif kind == "S" then
     StoreHearth(p, payload)
-
-  elseif kind == "P" then
-    local qid, target = payload:match("^(%d+)~(.+)$")
-    if target == ns.me and tonumber(qid) then ns.ShareQuest(tonumber(qid), true) end
 
   elseif ns.handlers[kind] then
     ns.handlers[kind](p, payload, guid)

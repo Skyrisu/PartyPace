@@ -6,7 +6,7 @@ Initial public beta.
 
 - Party quest overview for 2–5 players: progress per objective, level, XP and rested XP
 - RestedXP integration (optional): show only quests from the current guide steps, with look-ahead and guide order
-- Quest sharing: auto-share, shift-click to share or request a share, "share missing quests"
+- Quest sharing: auto-share, shift-click to share or request a share (with feedback and automatic retry), "share missing quests"
 - Missing quest hints with quest giver info (if Questie is installed)
 - "Who needs this?" loot upgrade hints, compared against each player's own gear
 - Hearthstone cooldown and bind location sync

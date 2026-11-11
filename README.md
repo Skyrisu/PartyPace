@@ -22,7 +22,7 @@ Built by a trio of friends leveling together in WoW Forever – because we were 
 
 **Sharing made easy**
 - Auto-share: new quests are shared with whoever is missing them
-- Shift-click a quest to share it – or, if *you* are the one missing it, to ask a party member to share it
+- Shift-click a quest to share it – or, if *you* are the one missing it, to ask a party member to share it. You'll get told if they're too far away or the quest can't be shared, and the next party member is asked automatically
 - "Share missing quests" pushes everything your party doesn't have yet
 
 **Missing quest hints**
