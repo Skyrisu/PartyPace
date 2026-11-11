@@ -10,6 +10,7 @@ Built by a trio of friends leveling together in WoW Forever – because we were 
 - One column per player (2–5) with progress bars, `3/8` counters and ✓ for completed objectives
 - Color stripe per quest: **red** someone is missing it · **yellow** progress differs · **green** everyone's done
 - Quest level in difficulty color, tags for group (`+`), dungeon (`D`) and raid (`R`) quests
+- Click a quest with several objectives to expand them into single rows – click again to collapse
 - Hover a quest to see every objective for every player
 - Header shows each player's level, XP and rested XP at a glance
 

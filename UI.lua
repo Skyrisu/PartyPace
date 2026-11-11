@@ -125,6 +125,30 @@ local function CellText(p, id)
   return floor(f * 100 + 0.5) .. "%", f
 end
 
+-- Zelle für ein einzelnes Ziel (aufgeklappte Quest)
+local function SubCellText(p, id, i)
+  local q = p.quests[id]
+  if not q then
+    if p.done[id] then return CHECKG, 1 end
+    return "|cffcc4444-|r", nil
+  end
+  if q.flag == 1 then return CHECK, 1 end
+  local n, r = q.obj[i * 2 - 1], q.obj[i * 2]
+  if not n or not r or r <= 0 then return "", nil end
+  if n >= r then return CHECK, 1 end
+  return n .. "/" .. r, n / r
+end
+
+-- Wie viele Ziele hat die Quest (bei irgendwem in der Gruppe)?
+local function NumObjectives(id)
+  local n = 0
+  for _, key in ipairs(ns.order) do
+    local q = ns.players[key] and ns.players[key].quests[id]
+    if q then n = max(n, #q.obj / 2) end
+  end
+  return n
+end
+
 -- personal = Klassen-/Berufsquest: dass sie anderen fehlt, ist normal und wird nicht rot markiert
 local function RowState(id, personal)
   local missing, differ, allDone, first = false, false, true, nil
@@ -163,6 +187,7 @@ end
 ---------------------------------------------------------------- Tooltip / Klicks
 local function RowEnter(self)
   local e = self.entry
+  if e and e.sub then e = e.parent end
   if not e or e.header then return end
   local id = e.id
   GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -221,13 +246,16 @@ local function RowEnter(self)
       GameTooltip:AddLine("Shift-click: ask for a share anyway", 0.5, 0.5, 0.5)
     end
   end
+  if e.multi then GameTooltip:AddLine("Click: show / hide objectives", 0.5, 0.5, 0.5) end
   GameTooltip:AddLine("Alt-click: hide quest · Alt+Ctrl-click: hide category", 0.5, 0.5, 0.5)
   GameTooltip:Show()
 end
 
-local function RowClick(self)
+local function RowClick(self, button)
   local e = self.entry
   if not e then return end
+  if e.sub then e = e.parent end
+  if button ~= "LeftButton" then return end
   if IsAltKeyDown() then
     if IsControlKeyDown() or e.header then
       local cat = e.header and e.title or e.zone
@@ -240,6 +268,10 @@ local function RowClick(self)
     ns.Refresh()
   elseif not e.header and IsShiftKeyDown() then
     if ns.logIndex[e.id] then ns.ShareQuest(e.id) else ns.RequestShare(e.id) end
+  elseif e.multi then
+    DB.expanded[e.id] = not DB.expanded[e.id] or nil
+    GameTooltip:Hide()
+    ns.Refresh()
   end
 end
 
@@ -330,7 +362,32 @@ function ns.Render()
   for i = 1, shown do
     local e, r = list[i + offset], GetRow(i)
     r.entry = e
-    if e.header then
+    if e.sub then
+      -- ein Ziel einer aufgeklappten Quest
+      r.title:SetFont(media.font, 10, "OUTLINE")
+      r.title:SetWidth(TITLEW - 18)
+      r.title:SetText("    " .. e.title)
+      r.title:SetTextColor(0.75, 0.75, 0.75)
+      r.stripe:SetVertexColor(0.25, 0.25, 0.25)
+      r.stripe:Show()
+      r.hl:SetAlpha(1)
+      for j = 1, #order do
+        local p, c = ns.players[order[j]], GetCell(r, j)
+        local txt, f = SubCellText(p, e.id, e.idx)
+        c.text:SetText(txt)
+        if f and f > 0 then
+          local cr, cg, cb = ClassColor(p.class)
+          c.bar:SetWidth((COLW - 2) * min(f, 1))
+          c.bar:SetVertexColor(cr, cg, cb, 0.3)
+          c.bar:Show()
+        else
+          c.bar:Hide()
+        end
+        c:SetAlpha(colOnline[j] and 1 or 0.35)
+        c:Show()
+      end
+      for j = #order + 1, #r.cells do r.cells[j]:Hide() end
+    elseif e.header then
       -- Zonen-Überschrift
       r.title:SetFont(media.font, 10, "OUTLINE")
       r.title:SetWidth(TITLEW + #order * COLW - 10)
@@ -399,7 +456,10 @@ function ns.Refresh()
           }
           e.state = RowState(id, band(tags, ns.PERSONAL) > 0)
           e.grank = ns.guide.rank[id] or 99
-          e.display = (e.grank == 0 and "|TInterface\\Buttons\\WHITE8X8:9:2:0:0:8:8:0:8:0:8:255:209:0|t " or "") .. LevelTag(e.level, tags) .. e.title
+          e.nObj = NumObjectives(id)
+          e.multi = e.nObj > 1
+          local fold = e.multi and (DB.expanded[id] and "|cff999999–|r " or "|cff999999+|r ") or ""
+          e.display = fold .. (e.grank == 0 and "|TInterface\\Buttons\\WHITE8X8:9:2:0:0:8:8:0:8:0:8:255:209:0|t " or "") .. LevelTag(e.level, tags) .. e.title
           total = total + 1
           if e.state <= 2 then off = off + 1 end
           if Visible(e) then list[#list + 1] = e else hidden = hidden + 1 end
@@ -415,17 +475,26 @@ function ns.Refresh()
     if a.level ~= b.level then return a.level < b.level end
     return a.title < b.title
   end)
-  if DB.groupZone then
-    local out, cur = {}, nil
-    for _, e in ipairs(list) do
-      if e.zone ~= cur then
-        cur = e.zone
-        out[#out + 1] = { header = true, title = cur }
-      end
-      out[#out + 1] = e
+  -- Zonen-Überschriften und aufgeklappte Ziele einfügen
+  local out, cur = {}, nil
+  for _, e in ipairs(list) do
+    if DB.groupZone and e.zone ~= cur then
+      cur = e.zone
+      out[#out + 1] = { header = true, title = cur }
     end
-    list = out
+    out[#out + 1] = e
+    if e.multi and DB.expanded[e.id] then
+      local texts = ns.objText[e.id]
+      for i = 1, e.nObj do
+        local t = texts and texts[i]
+        out[#out + 1] = { sub = true, parent = e, id = e.id, idx = i,
+                          title = (t and t ~= "") and t or ("Objective " .. i) }
+      end
+    end
   end
+  list = out
+  -- Aufgeklappt-Merker für Quests, die keiner mehr hat, aufräumen
+  for id in pairs(DB.expanded) do if not seen[id] then DB.expanded[id] = nil end end
 
   -- Kopfzeile: pro Spieler Name, Level, XP + Rested; offline = ausgegraut
   frame:SetWidth(PAD * 2 + TITLEW + max(1, #order) * COLW)

@@ -15,5 +15,6 @@ Initial public beta.
 - Hidden in raids by default (option: show own raid group)
 - Minimap addon menu entry
 - Resizable window: drag the corner for quest name width and number of rows
+- Click a quest to expand its objectives into single rows
 - Optional RestedXP target macro with attack ping (`/pace macro`)
 - Guide filter follows the whole party: steps of members behind or ahead of you stay visible

@@ -770,6 +770,7 @@ ev:SetScript("OnEvent", function(self, e, ...)
     if db.lootHints == nil then db.lootHints = true end
     db.hiddenQuests = db.hiddenQuests or {}
     db.hiddenHeaders = db.hiddenHeaders or {}
+    db.expanded = db.expanded or {}
     db.raidMode = db.raidMode or "hide"
     db.dbVersion = 1 -- für spätere Migrationen
     ns.DB = db
