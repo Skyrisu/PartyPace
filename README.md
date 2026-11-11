@@ -4,8 +4,6 @@
 
 Built by a trio of friends leveling together in WoW Forever – because we were tired of comparing quest logs on Discord.
 
-<!-- Screenshots: main window · RestedXP filter · loot upgrade toast · hearthstone tooltip -->
-
 ## Features
 
 **Party quest overview**

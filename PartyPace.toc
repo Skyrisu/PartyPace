@@ -20,6 +20,8 @@
 ## AddonCompartmentFuncOnLeave: PartyPace_OnCompartmentLeave
 ## SavedVariables: PartyPaceDB
 ## OptionalDeps: ElvUI, RXPGuides, Questie
+## X-Curse-Project-ID: 1797388
+## X-Website: https://github.com/Skyrisu/PartyPace
 
 Core.lua
 Guide.lua
