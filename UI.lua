@@ -14,7 +14,9 @@ local CROSS  = "|TInterface\\RaidFrame\\ReadyCheck-NotReady:12:12|t"
 local WAIT   = "|TInterface\\RaidFrame\\ReadyCheck-Waiting:12:12|t"
 local EMPTY  = {}
 
-local ROWH, COLW, TITLEW, PAD, HEADH, MAXROWS = 16, 40, 170, 4, 30, 18
+local ROWH, COLW, PAD, HEADH = 16, 40, 4, 30
+local TITLEW, MAXROWS = 170, 18 -- per Zieh-Griff einstellbar (DB.titleW / DB.maxRows)
+local sizing = false             -- true, solange am Griff gezogen wird
 
 -- Streifen links an jeder Zeile
 local STATE_COLOR = {
@@ -369,7 +371,9 @@ function ns.Render()
   local isEmpty = not DB.collapsed and #list == 0
   empty:SetShown(isEmpty)
   local body = isEmpty and ROWH or shown * ROWH
+  if sizing and not DB.collapsed then body = MAXROWS * ROWH end -- Vorschau der eingestellten Höhe
   frame:SetHeight(body > 0 and (HEADH + body + 4) or HEADH)
+  if frame.grip then frame.grip:SetShown(not DB.locked and not DB.collapsed) end
 end
 
 function ns.Refresh()
@@ -729,6 +733,72 @@ local function Place()
 end
 
 -- Skalieren, ohne dass das Fenster wegspringt (obere linke Ecke bleibt fix)
+-- Spaltenbreite/Zeilenzahl übernehmen und vorhandene Elemente neu ausrichten
+local function ApplyLayout()
+  TITLEW, MAXROWS = DB.titleW or 170, DB.maxRows or 18
+  for i, c in ipairs(cols) do
+    c:ClearAllPoints()
+    c:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD + TITLEW + (i - 1) * COLW + 1, -3)
+  end
+  for _, r in ipairs(rows) do
+    for i, c in ipairs(r.cells) do
+      c:ClearAllPoints()
+      c:SetPoint("LEFT", r, "LEFT", TITLEW + (i - 1) * COLW + 1, 0)
+    end
+  end
+  if info then info:SetWidth(TITLEW - 8) end
+end
+
+local function BuildGrip()
+  local g = CreateFrame("Button", nil, frame)
+  g:SetSize(14, 14)
+  g:SetPoint("BOTTOMRIGHT", -1, 1)
+  g:SetFrameLevel(frame:GetFrameLevel() + 10)
+  g:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+  g:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+  g:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+  g:SetAlpha(0.7)
+  g:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:AddLine("Drag: width of quest names / number of rows", 0.8, 0.8, 0.8)
+    GameTooltip:Show()
+  end)
+  g:SetScript("OnLeave", GameTooltip_Hide)
+  g:SetScript("OnMouseDown", function(self, button)
+    if button ~= "LeftButton" then return end
+    GameTooltip:Hide()
+    local s = frame:GetEffectiveScale()
+    local cx, cy = GetCursorPosition()
+    local start = { x = cx / s, y = cy / s, w = TITLEW, r = MAXROWS }
+    sizing = true
+    ns.Render()
+    -- OnUpdate nur während des Ziehens, danach wieder weg
+    self:SetScript("OnUpdate", function()
+      local x, y = GetCursorPosition()
+      x, y = x / s, y / s
+      local w = floor(min(360, max(110, start.w + (x - start.x))))
+      local r = floor(min(30, max(4, start.r + (start.y - y) / ROWH + 0.5)))
+      if w ~= TITLEW or r ~= MAXROWS then
+        DB.titleW, DB.maxRows = w, r
+        ApplyLayout()
+        ns.Refresh()
+      end
+    end)
+  end)
+  g:SetScript("OnMouseUp", function(self)
+    self:SetScript("OnUpdate", nil)
+    sizing = false
+    ns.Render()
+  end)
+  frame.grip = g
+end
+
+local function ResetLayout()
+  DB.titleW, DB.maxRows = nil, nil
+  ApplyLayout()
+  ns.Refresh()
+end
+
 local function SetScaleKeepPos(s)
   s = floor(min(2, max(0.5, s)) * 100 + 0.5) / 100
   local l, t, old = frame:GetLeft(), frame:GetTop(), frame:GetScale()
@@ -801,7 +871,7 @@ local function OpenMenu(owner)
     raid:CreateRadio("Show my raid group", function() return DB.raidMode == "group" end,
       function() DB.raidMode = "group"; ns.UpdateRoster() end)
     root:CreateCheckbox("Lock window", IsOn("locked"), function() DB.locked = not DB.locked end)
-    root:CreateButton("Reset size", function() SetScaleKeepPos(1) end)
+    root:CreateButton("Reset size", function() SetScaleKeepPos(1); ResetLayout() end)
   end)
 end
 
@@ -891,6 +961,8 @@ function ns.InitUI()
     if o ~= offset then offset = o; ns.Render() end
   end)
   frame:SetScript("OnShow", function() if dirty then ns.Refresh() end end)
+  BuildGrip()
+  ApplyLayout()
 
   frame:Hide()
   ns.UpdateVisibility()
@@ -975,6 +1047,7 @@ SlashCmdList.PARTYPACE = function(msg)
   elseif cmd == "reset" then
     DB.point = nil
     SetScaleKeepPos(1)
+    ResetLayout()
     DB.point = nil
     Place()
   elseif cmd == "sync" then
