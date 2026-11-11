@@ -453,6 +453,7 @@ function ns.ScanAndSend(full)
       if #d > 0 then SendPacked("T", d) end
       pendingDone = {} -- schon im Full-Sync enthalten
       Enqueue("S:" .. (HearthPayload()))
+      if ns.GuideAnnounce then ns.GuideAnnounce(true) end
     end
   end
   ns.MarkDirty()
@@ -779,6 +780,7 @@ ev:SetScript("OnEvent", function(self, e, ...)
     if db.autoShare == nil then db.autoShare = true end
     db.scale = db.scale or 1
     db.guideAhead = db.guideAhead or 3
+    if db.guideParty == nil then db.guideParty = true end
     if db.hideCamp == nil then db.hideCamp = true end
     if db.questHints == nil then db.questHints = true end
     if db.lootHints == nil then db.lootHints = true end

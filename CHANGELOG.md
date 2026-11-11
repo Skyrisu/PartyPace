@@ -16,3 +16,4 @@ Initial public beta.
 - Minimap addon menu entry
 - Resizable window: drag the corner for quest name width and number of rows
 - Optional RestedXP target macro with attack ping (`/pace macro`)
+- Guide filter follows the whole party: steps of members behind or ahead of you stay visible

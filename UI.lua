@@ -172,7 +172,8 @@ local function RowEnter(self)
   if sub ~= "" then GameTooltip:AddLine(sub, 0.55, 0.55, 0.55) end
   local gr = ns.guide.rank[id]
   if gr then
-    local when = gr == 0 and "current step" or (gr == 1 and "next step" or ("in " .. gr .. " steps"))
+    local when = gr == 0 and "current step" or (gr == 1 and "next step")
+      or (gr < 0 and (-gr .. (gr == -1 and " step" or " steps") .. " back – party is still here")) or ("in " .. gr .. " steps")
     GameTooltip:AddLine("Guide: " .. (ns.guide.what[id] or "quest") .. " · " .. when, 1, 0.82, 0)
   end
 
@@ -850,6 +851,9 @@ local function OpenMenu(owner)
     root:CreateDivider()
     root:CreateTitle("RestedXP")
     root:CreateCheckbox("Only current guide steps", IsOn("guideOnly"), Toggle("guideOnly"))
+    root:CreateCheckbox("Include party's guide steps", IsOn("guideParty"), function()
+      DB.guideParty = not DB.guideParty; ns.GuideCheck(true)
+    end)
     local ahead = root:CreateButton("Look ahead")
     for _, n in ipairs({ 0, 1, 3, 5, 10 }) do
       ahead:CreateRadio(n == 0 and "Current step only" or (n .. " steps"),

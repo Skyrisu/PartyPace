@@ -16,6 +16,7 @@ Built by a trio of friends leveling together in WoW Forever – because we were 
 **RestedXP integration** *(optional)*
 - "Only current guide steps": the list shrinks to the quests your current RestedXP step (plus a few steps ahead) actually needs – no more digging through the quest log
 - Sorted in guide order, current-step quests are marked
+- Party-aware: if someone is a few steps behind (or ahead), their steps' quests stay visible until everyone caught up
 - Target macro with ping *(off by default, `/pace macro`)*: copies RestedXP's target macro into a `PartyPace` macro that also pings your target for the party
 - Without RestedXP, PartyPace simply shows all quests
 

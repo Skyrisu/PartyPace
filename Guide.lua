@@ -33,13 +33,36 @@ local function Add(step, rank, rankT, whatT)
           id = tonumber(id)
           if id and id ~= 0 then
             id = abs(id)
-            if not rankT[id] or rank < rankT[id] then rankT[id], whatT[id] = rank, what end
+            -- näher am eigenen Schritt gewinnt
+            if not rankT[id] or abs(rank) < abs(rankT[id]) then rankT[id], whatT[id] = rank, what end
           end
         end
       end
     end
   end
 end
+
+local function GuideID()
+  local d = _G.RXPCData
+  if not d or not d.currentGuideName then return nil end
+  return ((d.currentGuideGroup or "") .. "/" .. d.currentGuideName):gsub("[~;]", ""):sub(1, 120)
+end
+
+-- Schritte der anderen (nur wer denselben Guide läuft): kleinster und größter Schritt
+local function PartySteps(myID)
+  local lo, hi
+  if not ns.DB.guideParty or not myID then return end
+  for _, key in ipairs(ns.order) do
+    local p = ns.players[key]
+    if key ~= ns.me and p and p.gid == myID and p.gstep then
+      lo = (not lo or p.gstep < lo) and p.gstep or lo
+      hi = (not hi or p.gstep > hi) and p.gstep or hi
+    end
+  end
+  return lo, hi
+end
+
+local mySent -- zuletzt verschickter eigener Schritt
 
 local function Rebuild()
   local f = _G.RXPFrame
@@ -56,9 +79,25 @@ local function Rebuild()
   end
   if last == 0 then last = tonumber(_G.RXPCData and _G.RXPCData.currentStep) or 0 end
 
+  G.step, G.id = last, GuideID()
+
   -- Vorausschauen (nur klassisches Guide-Fenster; im Beta-Fenster V2 gibt's nur die aktiven Schritte)
   local ahead = ns.DB.guideAhead or 3
   local pool = f and f.ScrollChild and f.ScrollChild.framePool
+
+  -- Gruppe: zurück bis zum Langsamsten, vor bis zum Schnellsten (max. 30 Schritte je Richtung).
+  -- Schritte, die ICH schon erledigt habe, zählen hier mit – die anderen brauchen sie ja noch.
+  local lo, hi = PartySteps(G.id)
+  if last > 0 and type(pool) == "table" then
+    local from = lo and math.max(math.min(lo, last), last - 30) or last
+    local to = hi and math.min(math.max(hi, last), last + 30) or last
+    for i = from, to do
+      local fr = pool[i]
+      local step = fr and fr.step
+      if i ~= last and step and step.index == i then Add(step, i - last, rankT, whatT) end
+    end
+  end
+
   if ahead > 0 and last > 0 and type(pool) == "table" then
     local n = 0
     for i = last + 1, last + 40 do
@@ -81,7 +120,7 @@ end
 local function Signature()
   local f = _G.RXPFrame
   local active = f and f.activeSteps
-  local s = tostring(_G.RXPCData and _G.RXPCData.currentStep) .. ":" .. (ns.DB.guideAhead or 3)
+  local s = tostring(_G.RXPCData and _G.RXPCData.currentStep) .. ":" .. (ns.DB.guideAhead or 3) .. ":" .. tostring(GuideID())
   if type(active) == "table" then
     for _, step in ipairs(active) do
       s = s .. "," .. tostring(type(step) == "table" and step.index)
@@ -103,8 +142,26 @@ function ns.GuideCheck(force)
       wipe(G.rank); wipe(G.what)
       ns.Print("RestedXP integration disabled – this RestedXP version isn't supported yet.")
     end
+    ns.GuideAnnounce(false)
     ns.MarkDirty()
   end
+end
+
+-- Eigenen Guide-Schritt an die Gruppe schicken (nur bei Änderung oder beim Full-Sync)
+function ns.GuideAnnounce(force)
+  if not G.loaded or not G.id or not G.step or G.step == 0 then return end
+  local key = G.step .. "~" .. G.id
+  if force or key ~= mySent then
+    mySent = key
+    ns.Send("G:" .. key)
+  end
+end
+
+ns.handlers.G = function(p, payload)
+  local idx, gid = payload:match("^(%d+)~(.+)$")
+  if not idx then return end
+  p.gstep, p.gid = tonumber(idx), gid
+  ns.GuideCheck(true)
 end
 
 function ns.GuideInit()
