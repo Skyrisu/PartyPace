@@ -21,7 +21,7 @@ ns.TAG = { GROUP = 1, CLASS = 2, PROF = 4, DUNGEON = 8, RAID = 16, CAMP = 32, SH
 ns.PERSONAL = 2 + 4 + 32 -- Klassen-, Berufs-, Camping-Quests: nicht rot markieren, nicht teilen
 local TAG = ns.TAG
 
-ns.handlers = {}  -- weitere Nachrichtentypen aus anderen Dateien (Loot.lua)
+ns.handlers = {}  -- weitere Nachrichtentypen aus anderen Dateien (Guide, Share, Loot)
 ns.players  = {}  -- [GUID] = { name, quests = {[qid] = {flag, obj}}, done = {[qid] = true}, level, xp, xpMax, rested, class, synced, version, check }
 ns.qinfo    = {}  -- [qid] = { title, level, tags, zone }
 ns.objText  = {}  -- [qid] = { Zieltexte aus dem eigenen Log }
@@ -326,7 +326,7 @@ local function QueueDone(qid)
   end)
 end
 
----------------------------------------------------------------- "Weiter?"-Check
+---------------------------------------------------------------- Ready?-Check
 local function BagFree()
   local getFree = (C_Container and C_Container.GetContainerNumFreeSlots) or GetContainerNumFreeSlots
   local free = 0
@@ -563,7 +563,7 @@ end
 
 -- Auto-Share: kurz warten, damit der Sync der anderen ankommt (falls sie die Quest gleichzeitig annehmen)
 local function AutoShare(qid)
-  if not ns.DB.autoShare or not IsInGroup() then return end
+  if not ns.DB.autoShare or not IsInGroup() or not ns.Active() then return end
   C_Timer.After(2.5, function()
     if NeedsShare(qid) then ns.ShareQuest(qid, true) end
   end)
@@ -730,9 +730,10 @@ local function OnAddon(prefix, msg, _, sender)
     end
 
   elseif kind == "C" then
+    if not ns.Active() then return end
     ResetChecks()
     StoreCheck(p, payload)
-    Enqueue("R:" .. SelfCheck())
+    ns.Send("R:" .. SelfCheck())
     ns.ShowCheck(true)
 
   elseif kind == "R" then

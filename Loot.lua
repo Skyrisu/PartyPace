@@ -88,6 +88,13 @@ local function EquippedLoc(slot)
   return link and select(4, GetItemInfoInstant(link)), link
 end
 
+-- Nebenhand-Slot zählt für eine Einhandwaffe nur, wenn dort eine Waffe liegt oder er leer ist
+local OH_WEAPON = { INVTYPE_WEAPON = true, INVTYPE_WEAPONOFFHAND = true }
+local function OffhandIsWeaponOrEmpty()
+  local loc, link = EquippedLoc(17)
+  return not link or OH_WEAPON[loc] or false
+end
+
 local function CanDual()
   if CanDualWield then
     local ok, r = pcall(CanDualWield)
@@ -143,7 +150,8 @@ local function Evaluate(link)
     if slots[1] == 17 and mhIs2H then return end -- Nebenhand bei Zweihänder: nicht vergleichbar
     local best
     for _, slot in ipairs(slots) do
-      local usable = slot ~= 17 or equipLoc ~= "INVTYPE_WEAPON" or (CanDual() and not mhIs2H)
+      local usable = slot ~= 17 or equipLoc ~= "INVTYPE_WEAPON"
+                     or (CanDual() and not mhIs2H and OffhandIsWeaponOrEmpty())
       if usable then
         local l = GetInventoryItemLink("player", slot)
         local st = Stats(l)
@@ -173,7 +181,7 @@ local function Evaluate(link)
     text = (diffs[1] and diffs[1][2] or "better") .. (diffs[2] and (", " .. diffs[2][2]) or "")
   end
   if minLevel > level then text = text .. " @" .. minLevel end
-  return text:gsub("[~;]", "")
+  return (text:gsub("[~;]", ""))
 end
 
 ---------------------------------------------------------------- Ablauf
@@ -220,10 +228,12 @@ local function OnItem(looter, itemString)
   if not id then return end
   local it = Entry(id)
   it.looter, it.t = looter, GetTime()
+  if C_Item and C_Item.DoesItemExistByID and not C_Item.DoesItemExistByID(id) then return end
   local item = Item:CreateFromItemID(id)
   item:ContinueOnItemLoad(function()
+    -- Link aus dem vollständigen Item-String holen, sonst fehlen Zufallswerte ("of the Monkey")
     local _, link = GetItemInfo(itemString)
-    it.link = link or item:GetItemLink()
+    it.link = link or itemString
     it.icon = item:GetItemIcon()
     local ok, text = pcall(Evaluate, it.link)
     if ok and text then
@@ -274,7 +284,7 @@ ev:SetScript("OnEvent", function(_, e, text, ...)
     if text:sub(1, #SKIP[i]) == SKIP[i] then return end
   end
   local s = text:match("|H(item:[^|]+)|h")
-  if not s then return end
+  if not s or text:find("|cff9d9d9d", 1, true) then return end -- graue Items interessieren nicht
   local _, _, _, equipLoc = GetItemInfoInstant(s)
   if not SLOTS[equipLoc] then return end -- nur ausrüstbare Sachen
   ns.Send("I:" .. s)

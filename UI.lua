@@ -455,7 +455,7 @@ function ns.Refresh()
     c:Show()
   end
 
-  local txt = format("%d Quests", total)
+  local txt = format(total == 1 and "%d quest" or "%d quests", total)
   if off > 0 then txt = txt .. format(" · |cffffbf26%d diff|r", off) end
   if hidden > 0 then txt = txt .. format(" · |cff777777%d hidden|r", hidden) end
   if DB.guideOnly then
@@ -485,7 +485,7 @@ function ns.UpdateVisibility()
   frame:SetShown(DB.show and (IsInGroup() or DB.solo) and ns.Active() and true or false)
 end
 
----------------------------------------------------------------- "Weiter?"-Panel
+---------------------------------------------------------------- Ready?-Panel
 local check, checkLines, checkTimer = nil, {}, nil
 local CHECKW = 262
 
@@ -916,7 +916,7 @@ function ns.InitUI()
   info:SetWidth(TITLEW - 8)
   info:SetTextColor(0.6, 0.6, 0.6)
 
-  -- "Weiter?"-Knopf
+  -- Ready?-Knopf
   local btn = CreateFrame("Button", nil, frame, BackdropTemplateMixin and "BackdropTemplate" or nil)
   btn:SetSize(46, 14)
   btn:SetPoint("LEFT", title, "RIGHT", 8, 0)
