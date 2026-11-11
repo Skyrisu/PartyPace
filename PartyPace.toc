@@ -1,0 +1,27 @@
+## Interface: 16001
+## Title: |cff33ff99Party|rPace
+## Notes: Level together: party quest progress, RestedXP-aware filters, loot upgrade hints and hearthstone sync.
+## Author: Skyrisu
+## Version: @project-version@
+## Category: Quests
+## Category-deDE: Quests
+## Category-esES: Misiones
+## Category-esMX: Misiones
+## Category-frFR: Quêtes
+## Category-itIT: Missioni
+## Category-koKR: 퀘스트
+## Category-ptBR: Missões
+## Category-ruRU: Задания
+## Category-zhCN: 任务
+## Category-zhTW: 任務
+## IconTexture: Interface\Icons\INV_Misc_GroupNeedMore
+## AddonCompartmentFunc: PartyPace_OnCompartmentClick
+## AddonCompartmentFuncOnEnter: PartyPace_OnCompartmentEnter
+## AddonCompartmentFuncOnLeave: PartyPace_OnCompartmentLeave
+## SavedVariables: PartyPaceDB
+## OptionalDeps: ElvUI, RXPGuides, Questie
+
+Core.lua
+Guide.lua
+Loot.lua
+UI.lua

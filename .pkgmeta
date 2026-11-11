@@ -1,0 +1,10 @@
+package-as: PartyPace
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - README.md
+  - .github
+  - .gitignore
