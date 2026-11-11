@@ -76,7 +76,7 @@ No. Everything is event-driven, there's no per-frame update, and only changes ar
 Your quest progress, level/XP, hearthstone cooldown and bind location, upgrade results and – only when someone clicks *Ready?* – free bag slots and durability. Nothing leaves your party.
 
 **Found a bug or have an idea?**
-Please open an issue – a BugSack error message helps a lot.
+Please [open an issue on GitHub](https://github.com/Skyrisu/PartyPace/issues) – a BugSack error message helps a lot.
 
 ## License
 
