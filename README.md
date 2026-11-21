@@ -79,6 +79,10 @@ Your quest progress, level/XP, hearthstone cooldown and bind location, upgrade r
 **Found a bug or have an idea?**
 Please [open an issue on GitHub](https://github.com/Skyrisu/PartyPace/issues) – a BugSack error message helps a lot.
 
+## Support
+
+PartyPace is free and always will be. If it saves your group some back-and-forth on Discord and you'd like to say thanks, you can [buy me a coffee on Ko-fi](https://ko-fi.com/skyrisu) ☕
+
 ## License
 
 All Rights Reserved © Skyrisu. You're welcome to use and tinker with PartyPace for yourself – please don't re-upload it. See [LICENSE](https://github.com/Skyrisu/PartyPace/blob/main/LICENSE).
